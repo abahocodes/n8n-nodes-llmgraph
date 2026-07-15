@@ -1,9 +1,6 @@
 import type {
-	ICredentialsDecrypted,
-	ICredentialTestFunctions,
 	IDataObject,
 	IExecuteFunctions,
-	INodeCredentialTestResult,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
@@ -88,7 +85,6 @@ export class LlmGraph implements INodeType {
 			{
 				name: 'llmGraphApi',
 				required: true,
-				testedBy: 'llmGraphApiTest',
 			},
 		],
 		properties: [
@@ -134,61 +130,6 @@ export class LlmGraph implements INodeType {
 				},
 			},
 		],
-	};
-
-	methods = {
-		credentialTest: {
-			// LLMGraph deployments only expose POST, so the test performs a real
-			// workflow invocation with an empty JSON body. A 422 means the request
-			// authenticated and the workflow ran but failed on the empty input, so
-			// the credential itself is valid.
-			async llmGraphApiTest(
-				this: ICredentialTestFunctions,
-				credential: ICredentialsDecrypted,
-			): Promise<INodeCredentialTestResult> {
-				const { endpointUrl, apiKey } = credential.data as {
-					endpointUrl: string;
-					apiKey: string;
-				};
-
-				try {
-					// eslint-disable-next-line @n8n/community-nodes/no-deprecated-workflow-functions -- ICredentialTestFunctions only exposes the request helper; httpRequest is not available in the credential test context
-					await this.helpers.request({
-						method: 'POST',
-						uri: endpointUrl,
-						headers: { 'x-api-key': apiKey },
-						body: {},
-						json: true,
-					});
-				} catch (error) {
-					const statusCode = extractStatusCode(error);
-
-					if (statusCode === 422) {
-						return {
-							status: 'OK',
-							message:
-								'Authentication successful. The test run reported a workflow failure, which is expected when the workflow requires input.',
-						};
-					}
-
-					if (statusCode !== undefined) {
-						return {
-							status: 'Error',
-							message:
-								ERROR_MESSAGES[statusCode] ??
-								`The deployment endpoint returned HTTP ${statusCode}`,
-						};
-					}
-
-					return {
-						status: 'Error',
-						message: `Could not reach the deployment endpoint: ${(error as Error).message}`,
-					};
-				}
-
-				return { status: 'OK', message: 'Authentication successful' };
-			},
-		},
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {

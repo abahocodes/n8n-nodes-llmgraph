@@ -56,7 +56,7 @@ You need an LLMGraph account with a deployed workflow.
 3. Copy the deployment API key.
 4. In n8n, create new LLMGraph API credentials and paste both values.
 
-Note: LLMGraph deployment endpoints only accept POST requests, so the credential test performs a real invocation of your workflow with an empty JSON body (`{}`). The test is smart about the outcome: an HTTP 422 run failure still counts as a successful test, because it proves the URL and key are valid even when the workflow needs input. Only authentication and reachability problems (for example 401, 403, 404, or a network error) fail the test.
+Note: LLMGraph deployment endpoints only accept POST requests, so the credential test performs a real invocation of your workflow with an empty JSON body (`{}`). If your workflow requires input, the test may report an HTTP 422 run failure with a message explaining that the credentials were accepted and only the empty test input was rejected; in that case save the credential and run the node with real input. Authentication and reachability problems (401, 403, 404, or a network error) mean the endpoint URL or key needs fixing.
 
 ## Usage
 

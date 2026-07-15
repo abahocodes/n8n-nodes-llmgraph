@@ -1,4 +1,10 @@
-import type { IAuthenticateGeneric, ICredentialType, Icon, INodeProperties } from 'n8n-workflow';
+import type {
+	IAuthenticateGeneric,
+	ICredentialTestRequest,
+	ICredentialType,
+	Icon,
+	INodeProperties,
+} from 'n8n-workflow';
 
 export class LlmGraphApi implements ICredentialType {
 	name = 'llmGraphApi';
@@ -45,8 +51,28 @@ export class LlmGraphApi implements ICredentialType {
 		},
 	};
 
-	// The credential test lives on the node as methods.credentialTest
-	// (llmGraphApiTest, wired via testedBy in the node description), because
-	// deciding that HTTP 422 still means a valid credential needs logic that a
-	// declarative test request cannot express.
+	// Deployments only expose POST, so the test performs a real workflow
+	// invocation with an empty JSON body. Declarative test rules can only
+	// customize failure messages, so a 422 (request authenticated, workflow
+	// rejected the empty input) surfaces the explanatory message below rather
+	// than a green check. 401 and 404 mean the credentials are wrong.
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: '={{$credentials.endpointUrl}}',
+			url: '',
+			method: 'POST',
+			body: {},
+			json: true,
+		},
+		rules: [
+			{
+				type: 'responseCode',
+				properties: {
+					value: 422,
+					message:
+						'Credentials accepted: the test invocation authenticated, and the workflow only rejected the empty test input. Save the credential and run the node with real input.',
+				},
+			},
+		],
+	};
 }
