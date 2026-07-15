@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-llmgraph",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["AI", "Development"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://www.npmjs.com/package/n8n-nodes-llmgraph"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://www.npmjs.com/package/n8n-nodes-llmgraph"
+			}
+		]
+	}
+}
